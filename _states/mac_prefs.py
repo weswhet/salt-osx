@@ -4,7 +4,7 @@ State will write or delete macOS preferences.
 
 Below is a general guide to where the preferences will be written if you
 specify a user and host. If you don't specify a runas user it will be written to
-to roots directory, otherwise the given Users directory.
+root's directory, otherwise the given Users directory.
 
 {'file': ('/var/root/Library/Preferences/ByHost/domain.xxxx.plist'),
     'domain': domain,
@@ -24,14 +24,14 @@ to roots directory, otherwise the given Users directory.
 
 
 .. code-block:: yaml
-    write_burrito_location_prefence:
+    write_burrito_location_preference:
       prefs.write:
         - name: BurritoLocation
         - value: The Mission
         - domain: com.rounded.edges.corp
 
 .. code-block:: yaml
-    write_burrito_location_prefence:
+    write_burrito_location_preference:
       prefs.delete:
         - name: BurritoLocation
         - domain: com.rounded.edges.corp
@@ -74,7 +74,7 @@ def write(name, value, domain, user=None, host=None, runas=None):
            'result': True,
            'changes': {},
            'comment': ''}
- 
+
     # get our current value.
     old_value = __salt__['prefs.read'](name, domain, user, host, runas)
 
