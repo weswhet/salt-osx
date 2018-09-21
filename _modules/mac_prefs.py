@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 '''
-Support for reading and writing of preference key/values with ObjectiveC's CFPreferences
-Modules. Documentation on the Modules can be found here. https://developer.apple.com/documentation/corefoundation/preferences_utilities?language=objc
+Support for reading and writing of preference key/values with Cocoa's
+Core Foundation framework. Documentation on the Modules can be found
+here:
+https://developer.apple.com/documentation/corefoundation/preferences_utilities?language=objc
 
 This appears to be significantly faster than shelling out to `defaults`.
 
 This module has some caveats.
-1. Requires the PyObjC package. It will try to import this package from Salts
-path, if that fails it will try to use the system PyObjC that ships with macOS.
+1. Requires the PyObjC package. It will try to import this package from
+Salt's path, if that fails it will try to use the system PyObjC that
+ships with macOS.
 '''
 # py libs
 import logging
