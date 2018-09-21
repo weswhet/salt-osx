@@ -57,6 +57,24 @@ def __virtual__():
 
 def write(name, value, domain, user=None, host=None, runas=None):
     '''
+    Set a preference value using CFPreferences. This is deprecated in
+    favor of exists and will be removed in a future version.
+
+    name
+        The preference key to write.
+
+    value
+        The value to which the key should be set, type will match the types
+        passed via the state.
+
+    domain
+        The domain to which the key and value should be set in.
+    '''
+    return exists(name, value, domain, user=None, host=None, runas=None)
+
+
+def exists(name, value, domain, user=None, host=None, runas=None):
+    '''
     Set a preference value using CFPreferences.
 
     name
@@ -101,6 +119,20 @@ def write(name, value, domain, user=None, host=None, runas=None):
 
 
 def delete(name, domain, user=None, host=None, runas=None):
+    '''
+    Delete a Preference Key. This is deprecated in
+    favor of absent and will be removed in a future version.
+
+    name
+        The preference key to delete.
+
+    domain
+        The domain the key should be removed from.
+    '''
+    return absent(name, domain, user=None, host=None, runas=None)
+
+
+def absent(name, domain, user=None, host=None, runas=None):
     '''
     Delete a Preference Key.
 
