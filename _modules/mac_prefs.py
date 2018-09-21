@@ -35,6 +35,7 @@ __func_alias__ = {
     'list_': 'list',
 }
 
+
 def __virtual__():
     if salt.utils.platform.is_darwin():
         return __virtualname__
@@ -49,8 +50,7 @@ def _convert_pyobjc_objects(pref):
     object to normal list and dictionary python objects.
     '''
     if isinstance(pref, Foundation.NSDate):
-        log.debug('mac_prefs._convert_pyobjc_objects - '
-                  'converting "{}" NSDate to string...'.format(pref))
+        log.debug('mac_prefs._convert_pyobjc_objects - converting "%s" NSDate to string...', pref)
         return str(pref)
 
     return Conversion.pythonCollectionFromPropertyList(pref)
@@ -68,8 +68,7 @@ def _get_user_and_host(user, host):
     else:
         raise CommandExecutionError(
             'Error proccessing parameter "user": [{0}], must be "any" or'
-            ' "current". NOT [{0}]'.format(user)
-        )
+            ' "current". NOT [{0}]'.format(user))
 
     if host.lower() == 'any':
         host_pref = Foundation.kCFPreferencesAnyHost
@@ -78,10 +77,8 @@ def _get_user_and_host(user, host):
     else:
         raise CommandExecutionError(
             'Error proccessing parameter "host": [{0}], must be "any" or'
-            ' "current". NOT [{0}]'.format(host)
-        )
-    log.debug('Using user domain: [{}] and host domain: [{}]'.format(user_pref,
-                                                                     host_pref))
+            ' "current". NOT [{0}]'.format(host))
+    log.debug('Using user domain: [%s] and host domain: [%s]', user_pref, host_pref)
     return (user_pref, host_pref)
 
 
@@ -100,7 +97,7 @@ def _read_pref(name, domain, user, host, runas):
                 ' does not exist.'.format(runas)
             )
         # need to run as the user
-        log.debug('Setting EUID to {}'.format(runas))
+        log.debug('Setting EUID to %s', runas)
         os.seteuid(uid)
 
     if user:
@@ -115,8 +112,7 @@ def _read_pref(name, domain, user, host, runas):
     #need to bring ourselves back up to root
     path = '/var/root/Library/Preferences/'
     d_path = os.path.join(path, domain)
-    log.debug('Reading key: "{}" in'
-              ' domain: "{}" at "{}"'.format(name, domain, d_path))
+    log.debug('Reading key: "%s" in domain: "%s" at "%s"', name, domain, d_path)
     return Foundation.CFPreferencesCopyAppValue(name, domain)
 
 
@@ -131,18 +127,17 @@ def _set_pref(name, value, domain, user, host, runas):
             uid = pwd.getpwnam(runas).pw_uid
         except KeyError:
             raise CommandExecutionError(
-                'Set to runas user {}, this user'
-                ' does not exist.'.format(runas)
-            )
+                'Set to runas user {}, this user does not exist.'.format(
+                    runas))
         # need to run as the user
-        log.debug('Setting EUID to {}'.format(runas))
+        log.debug('Setting EUID to %s', runas)
         os.seteuid(uid)
     if user:
         pref_user, pref_host = _get_user_and_host(user, host)
         path = '/Library/Preferences/'
         d_path = os.path.join(path, domain)
-        log.debug('Settting key: "{}" to value: "{}" in '
-                  'domain: "{}" in "{}"'.format(name, value, domain, d_path))
+        log.debug('Settting key: "%s" to value: "%s" in domain: "%s" in "%s"', name, value, domain,
+                  d_path)
         try:
             set_val = Foundation.CFPreferencesSetValue(name,
                                                        value,
@@ -157,8 +152,8 @@ def _set_pref(name, value, domain, user, host, runas):
             return False
     path = '/var/root/Library/Preferences/'
     d_path = os.path.join(path, domain)
-    log.debug('Settting key: "{}" to value: "{}" in'
-              ' domain: "{}" in "{}"'.format(name, value, domain, d_path))
+    log.debug('Settting key: "%s" to value: "%s" in domain: "%s" in "%s"', name, value, domain,
+              d_path)
     Foundation.CFPreferencesSetAppValue(name, value, domain)
     return Foundation.CFPreferencesAppSynchronize(domain)
 
@@ -255,13 +250,11 @@ def set_(name, value, domain, user=None, host=None, runas=None):
     # get the value to check if it was set correctly.
     new_val = read(name, domain, user, host, runas)
 
-    log.debug('New value for key: "{}" in domain: '
-              '"{}" is "{}"'.format(name, domain, new_val))
+    log.debug('New value for key: "%s" in domain: "%s" is "%s"', name, domain, new_val)
 
     # check to see if everything was set correctly
     if new_val != value:
-        log.debug('prefs.set Value of {}, for key {}, '
-                  'was not set properly.'.format(value, name))
+        log.debug('prefs.set Value of %s, for key %s, was not set properly.', value, name)
         return False
 
     return True
@@ -286,16 +279,7 @@ def list_(name, user, host, runas=None, values=False):
         salt '*' prefs.list com.apple.ScreenSaver True
     '''
 
-    log.debug('Gathering Key List for {}'.format(name))
-    if (runas and not host) or (runas and not user)\
-        or (runas and not user and not host):
-        raise CommandExecutionError(
-            'If using "runas" you must specify a "user" and "host" domains.'
-        )
-    if user and not host or host and not user:
-        raise CommandExecutionError(
-            'If using "host" or "user" you must specify both not just one.'
-        )
+    log.debug('Gathering Key List for %s', name)
     user_domain, host_domain = _get_user_and_host(user, host)
     if runas:
         try:
@@ -307,7 +291,7 @@ def list_(name, user, host, runas=None, values=False):
                 ' does not exist.'.format(runas)
             )
         # need to run as the user
-        log.debug('Setting EUID to [{}]'.format(runas))
+        log.debug('Setting EUID to [%s]', runas)
         os.seteuid(uid)
     key_list = Foundation.CFPreferencesCopyKeyList(name, user_domain, host_domain)
     os.seteuid(0)
