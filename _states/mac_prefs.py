@@ -69,8 +69,17 @@ def write(name, value, domain, user=None, host=None, runas=None):
 
     domain
         The domain to which the key and value should be set in.
+
+    user
+        The user domain to use, either 'current' or 'any'.
+
+    host
+        The host domain to use, either 'current' or 'any'.
+
+    runas
+        The user to run as should be a short username.
     '''
-    return exists(name, value, domain, user=None, host=None, runas=None)
+    return exists(name, value, domain, user, host, runas)
 
 
 def exists(name, value, domain, user=None, host=None, runas=None):
@@ -86,35 +95,49 @@ def exists(name, value, domain, user=None, host=None, runas=None):
 
     domain
         The domain to which the key and value should be set in.
-    '''
 
+    user
+        The user domain to use, either 'current' or 'any'.
+
+    host
+        The host domain to use, either 'current' or 'any'.
+
+    runas
+        The user to run as should be a short username.
+    '''
     ret = {'name': name,
-           'result': True,
+           'result': False,
            'changes': {},
            'comment': ''}
 
-    # get our current value.
+    # Currently, no validation is performed.
+
     old_value = __salt__['prefs.read'](name, domain, user, host, runas)
 
     # check if we are set correctly
     if old_value == value:
-        ret['comment'] = '{0} {1} is already set to {2}'.format(domain,
-                                                                name,
-                                                                value)
+        ret['result'] = True
+        ret['comment'] = '{} {} is already set to {}'.format(
+            domain, name, value)
         return ret
 
-    # we are not so we need set it
+    ret['changes'].update({name: {'old': old_value, 'new': value}})
+
+    # See if we're in test mode and report if so.
+    if __opts__['test']:
+        ret['result'] = None
+        ret['comment'] = '{} {} would be set to {}'.format(
+            domain, name, value)
+        return ret
+
     set_val = __salt__['prefs.set'](name, value, domain, user, host, runas)
 
     if not set_val:
-        ret['result'] = False
-        ret['comment'] = 'Failed to set {0} {1} to {2}'.format(domain,
-                                                               name,
-                                                               value)
+        ret['comment'] = 'Failed to set {} {} to {}'.format(
+            domain, name, value)
     else:
-        ret['comment'] = '{0} {1} is set to {2}'.format(domain, name, value)
-        ret['changes'].update({name: {'old': old_value,
-                                      'new': value}})
+        ret['result'] = True
+        ret['comment'] = '{} {} is set to {}'.format(domain, name, value)
     return ret
 
 
@@ -128,8 +151,17 @@ def delete(name, domain, user=None, host=None, runas=None):
 
     domain
         The domain the key should be removed from.
+
+    user
+        The user domain to use, either 'current' or 'any'.
+
+    host
+        The host domain to use, either 'current' or 'any'.
+
+    runas
+        The user to run as should be a short username.
     '''
-    return absent(name, domain, user=None, host=None, runas=None)
+    return absent(name, domain, user, host, runas)
 
 
 def absent(name, domain, user=None, host=None, runas=None):
@@ -141,29 +173,42 @@ def absent(name, domain, user=None, host=None, runas=None):
 
     domain
         The domain the key should be removed from.
+
+    user
+        The user domain to use, either 'current' or 'any'.
+
+    host
+        The host domain to use, either 'current' or 'any'.
+
+    runas
+        The user to run as should be a short username.
     '''
 
     ret = {'name': name,
-           'result': True,
+           'result': False,
            'changes': {},
            'comment': ''}
 
-    # get our current value.
     old_value = __salt__['prefs.read'](name, domain, user, host, runas)
 
-    # check if we are set correctly
     if old_value is None:
-        ret['comment'] = '{0} {1} is already removed.'.format(domain, name)
+        ret['result'] = True
+        ret['comment'] = '{} {} is already removed.'.format(domain, name)
         return ret
 
-    # we are not so we need set it
+    ret['changes'].update({name: {'old': old_value, 'new': None}})
+
+    # See if we're in test mode and report if so.
+    if __opts__['test']:
+        ret['result'] = None
+        ret['comment'] = '{} {} would be removed.'.format(domain, name)
+        return ret
+
     set_val = __salt__['prefs.set'](name, None, domain, user, host, runas)
 
     if not set_val:
-        ret['result'] = False
-        ret['comment'] = 'Failed to remove {0} {1}.'.format(domain, name)
+        ret['comment'] = 'Failed to remove {} {}.'.format(domain, name)
     else:
-        ret['comment'] = '{0} {1} has been removed.'.format(domain, name)
-        ret['changes'].update({name: {'old': old_value,
-                                      'new': 'removed'}})
+        ret['result'] = True
+        ret['comment'] = '{} {} has been removed.'.format(domain, name)
     return ret
