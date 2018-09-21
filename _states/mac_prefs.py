@@ -25,25 +25,27 @@ root's directory, otherwise the given Users directory.
 
 .. code-block:: yaml
     write_burrito_location_preference:
-      prefs.write:
+      prefs.exists:
         - name: BurritoLocation
         - value: The Mission
         - domain: com.rounded.edges.corp
 
 .. code-block:: yaml
     write_burrito_location_preference:
-      prefs.delete:
+      prefs.absent:
         - name: BurritoLocation
         - domain: com.rounded.edges.corp
         - user: True
 '''
 
-import salt.utils.platform
+
 import logging
 import sys
 
-log = logging.getLogger(__name__)
+import salt.utils.platform
 
+
+log = logging.getLogger(__name__)
 
 __virtualname__ = 'prefs'
 
@@ -183,7 +185,6 @@ def absent(name, domain, user=None, host=None, runas=None):
     runas
         The user to run as should be a short username.
     '''
-
     ret = {'name': name,
            'result': False,
            'changes': {},
