@@ -12,28 +12,21 @@ This module has some caveats.
 Salt's path, if that fails it will try to use the system PyObjC that
 ships with macOS.
 '''
-# py libs
+
 import logging
-import sys
 import os
 import pwd
-# salt libs
+import sys
+
 import salt.utils
 import salt.utils.platform
 from salt.exceptions import CommandExecutionError
 
+import Foundation
+from PyObjCTools import Conversion
+
+
 log = logging.getLogger(__name__)
-
-try:
-    import Foundation
-    from PyObjCTools import Conversion
-    log.trace('module.mac_prefs - PyObjC import successful.')
-except ImportError:
-    log.trace('module.mac_prefs - Failed to Import PyObjC, Using Sys.')
-    sys.path.append('/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC')
-    import Foundation
-    from PyObjCTools import Conversion
-
 
 __virtualname__ = 'prefs'
 
