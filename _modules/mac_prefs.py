@@ -157,6 +157,21 @@ def _set_pref(name, value, domain, user, host, runas):
     Foundation.CFPreferencesSetAppValue(name, value, domain)
     return Foundation.CFPreferencesAppSynchronize(domain)
 
+
+def _check_args(user, host, runas):
+    required_together = (user, host)
+
+    if runas and not all(required_together):
+        raise CommandExecutionError(
+            'If using "runas" you must specify a "user" and "host" domains.')
+
+    elif any(required_together) and not all(required_together):
+        raise CommandExecutionError(
+                'If using "host" or "user" you must specify both.')
+    else:
+        return True
+
+
 def read(name, domain, user=None, host=None, runas=None):
     '''
     Read a preference using CFPreferences.
@@ -185,15 +200,8 @@ def read(name, domain, user=None, host=None, runas=None):
         salt '*' prefs.read IdleTime com.apple.ScreenSaver
         salt '*' prefs.read IdleTime com.apple.ScreenSaver True
     '''
-    if (runas and not host) or (runas and not user)\
-        or (runas and not user and not host):
-        raise CommandExecutionError(
-            'If using "runas" you must specify a "user" and "host" domains.'
-        )
-    if user and not host or host and not user:
-        raise CommandExecutionError(
-            'If using "host" or "user" you must specify both not just one.'
-        )
+    _check_args(user, host, runas)
+
 
     return _convert_pyobjc_objects(_read_pref(name,
                                               domain,
@@ -236,15 +244,8 @@ def set_(name, value, domain, user=None, host=None, runas=None):
         salt '*' prefs.set IdleTime 180 com.apple.ScreenSaver
         salt '*' prefs.set IdleTime 180 com.apple.ScreenSaver True
     '''
-    if (runas and not host) or (runas and not user)\
-        or (runas and not user and not host):
-        raise CommandExecutionError(
-            'If using "runas" you must specify a "user" and "host" domains.'
-        )
-    if user and not host or host and not user:
-        raise CommandExecutionError(
-            'If using "host" or "user" you must specify both not just one.'
-        )
+    _check_args(user, host, runas)
+
     set_val = _set_pref(name, value, domain, user, host, runas)
 
     # get the value to check if it was set correctly.
@@ -280,6 +281,9 @@ def list_(name, user, host, runas=None, values=False):
     '''
 
     log.debug('Gathering Key List for %s', name)
+
+    _check_args(user, host, runas)
+
     user_domain, host_domain = _get_user_and_host(user, host)
     if runas:
         try:
